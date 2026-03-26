@@ -1,0 +1,5 @@
+{
+  "name": "The Pitch",
+  "description": "A high-performance soccer match organizer and community hub for digital athletes.",
+  "requestFramePermissions": ["geolocation"]
+}

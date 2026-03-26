@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "Lexend", sans-serif;
+  
+  --color-primary: #006a35;
+  --color-primary-dim: #005c2d;
+  --color-primary-container: #6bfe9c;
+  --color-on-primary: #cdffd4;
+  --color-on-primary-container: #005f2f;
+  
+  --color-secondary: #4953ac;
+  --color-secondary-container: #cbceff;
+  --color-on-secondary-container: #343d96;
+  
+  --color-surface: #f5f6f7;
+  --color-surface-container: #e6e8ea;
+  --color-surface-container-low: #eff1f2;
+  --color-surface-container-high: #e0e3e4;
+  --color-surface-container-highest: #dadddf;
+  --color-surface-container-lowest: #ffffff;
+  
+  --color-on-surface: #2c2f30;
+  --color-on-surface-variant: #595c5d;
+  
+  --color-outline-variant: #abadae;
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface antialiased font-sans;
+  }
+}
+
+.field-pattern {
+  background-image: radial-gradient(circle at 2px 2px, rgba(0, 106, 53, 0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
