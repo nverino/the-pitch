@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, Clock, MapPin, ChevronRight, Check, X, Users as UsersIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useFirebase } from '../context/FirebaseContext';
 import { db, collection, query, where, onSnapshot, orderBy, limit, updateDoc, doc } from '../firebase';
@@ -29,6 +29,7 @@ interface Invitation {
 
 export default function Dashboard() {
   const { user } = useFirebase();
+  const navigate = useNavigate();
   const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [nextGame, setNextGame] = useState<Game | null>(null);
@@ -181,7 +182,12 @@ export default function Dashboard() {
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-headline text-xl font-black text-on-surface">Siguientes partidos</h2>
-            <button className="text-sm font-black text-primary hover:text-primary-dim">ver todos</button>
+            <button 
+              onClick={() => navigate('/all-games')}
+              className="text-sm font-black text-primary hover:text-primary-dim"
+            >
+              ver todos
+            </button>
           </div>
           
           <div className="space-y-4">

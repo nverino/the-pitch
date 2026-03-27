@@ -14,6 +14,7 @@ import CommunityHub from './pages/CommunityHub';
 import GroupRankings from './pages/GroupRankings';
 import Login from './pages/Login';
 import Welcome from './pages/Welcome';
+import AllGames from './pages/AllGames';
 import { FirebaseProvider, useFirebase } from './context/FirebaseContext';
 import { Settings, Share2, X } from 'lucide-react';
 
@@ -44,6 +45,13 @@ function AppContent() {
       <Route path="/welcome" element={
         <ProtectedRoute>
           <Welcome />
+        </ProtectedRoute>
+      } />
+      <Route path="/all-games" element={
+        <ProtectedRoute>
+          <Layout title="Todos los Partidos">
+            <AllGames />
+          </Layout>
         </ProtectedRoute>
       } />
       <Route path="/" element={

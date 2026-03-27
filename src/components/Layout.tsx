@@ -54,7 +54,7 @@ export default function Layout({ children, title = "The Pitch", showBack, onBack
             {rightAction || (
               <NavLink to="/create-game" className="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-xl font-bold active:scale-95 transition-all hover:bg-primary-dim">
                 <PlusCircle className="w-5 h-5" />
-                <span className="hidden md:inline">Create Game</span>
+                <span className="hidden md:inline">Crear Partido</span>
               </NavLink>
             )}
             {user && (

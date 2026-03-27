@@ -1,8 +1,9 @@
 import { Search, PlusCircle, Compass, Users, Map as MapIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
 export default function CommunityHub() {
+  const navigate = useNavigate();
   return (
     <div className="space-y-10">
       {/* Search & Action Bar */}
@@ -28,7 +29,12 @@ export default function CommunityHub() {
           <section>
             <div className="flex justify-between items-baseline mb-6">
               <h2 className="font-headline font-bold text-2xl">Your Groups</h2>
-              <button className="text-primary font-bold text-sm hover:underline">View All</button>
+              <button 
+                onClick={() => navigate('/all-games')}
+                className="text-primary font-bold text-sm hover:underline"
+              >
+                ver todos
+              </button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
