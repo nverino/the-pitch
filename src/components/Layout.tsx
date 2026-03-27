@@ -1,7 +1,8 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Trophy, Users, User, PlusCircle, Share2, ArrowLeft, X, Settings } from 'lucide-react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Trophy, Users, User, PlusCircle, Share2, ArrowLeft, X, Settings, LogOut } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useFirebase } from '../context/FirebaseContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,13 @@ interface LayoutProps {
 
 export default function Layout({ children, title = "The Pitch", showBack, onBack, rightAction }: LayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useFirebase();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -30,7 +38,7 @@ export default function Layout({ children, title = "The Pitch", showBack, onBack
             ) : (
               <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-primary">
                 <img 
-                  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop" 
+                  src={user?.photoURL || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop"} 
                   alt="Profile" 
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
@@ -48,6 +56,15 @@ export default function Layout({ children, title = "The Pitch", showBack, onBack
                 <PlusCircle className="w-5 h-5" />
                 <span className="hidden md:inline">Create Game</span>
               </NavLink>
+            )}
+            {user && (
+              <button 
+                onClick={handleLogout}
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-error active:scale-95"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
             )}
           </div>
         </div>

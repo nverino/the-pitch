@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A player or organizer in the system.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["player", "admin"] }
+      },
+      "required": ["uid", "displayName", "email"]
+    },
+    "Game": {
+      "title": "Game",
+      "description": "A scheduled soccer match.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "location": { "type": "string" },
+        "type": { "type": "string", "enum": ["5v5", "7v7", "11v11"] },
+        "cost": { "type": "number" },
+        "organizerId": { "type": "string" },
+        "players": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] }
+      },
+      "required": ["title", "date", "time", "organizerId"]
+    },
+    "Group": {
+      "title": "Group",
+      "description": "A community of players.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "members": { "type": "array", "items": { "type": "string" } },
+        "organizerId": { "type": "string" }
+      },
+      "required": ["name", "organizerId"]
+    },
+    "Invitation": {
+      "title": "Invitation",
+      "description": "A request for a player to join a game.",
+      "type": "object",
+      "properties": {
+        "gameId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] }
+      },
+      "required": ["gameId", "senderId", "receiverId", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles."
+    },
+    "/games/{gameId}": {
+      "schema": "Game",
+      "description": "Scheduled matches."
+    },
+    "/groups/{groupId}": {
+      "schema": "Group",
+      "description": "Player communities."
+    },
+    "/invitations/{invitationId}": {
+      "schema": "Invitation",
+      "description": "Game invitations."
+    }
+  }
+}

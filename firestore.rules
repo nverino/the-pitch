@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Fields: uid, displayName, email, photoURL, role
+    //
+    // Collection: games
+    // Fields: title, date, time, location, type, cost, organizerId, players, status
+    //
+    // Collection: groups
+    // Fields: name, description, members, organizerId
+    //
+    // Collection: invitations
+    // Fields: gameId, senderId, receiverId, status
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "nverino@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'email']) &&
+             data.uid is string &&
+             data.displayName is string && data.displayName.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidGame(data) {
+      return data.keys().hasAll(['title', 'date', 'time', 'organizerId']) &&
+             data.title is string && data.title.size() < 200 &&
+             data.organizerId == request.auth.uid;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && 
+                      request.resource.data.role == resource.data.role;
+    }
+
+    match /games/{gameId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidGame(request.resource.data);
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.organizerId || 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['players'])
+      );
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.organizerId;
+    }
+
+    match /groups/{groupId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.organizerId ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
+      );
+    }
+
+    match /invitations/{invitationId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.senderId || 
+        request.auth.uid == resource.data.receiverId
+      );
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.senderId;
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.receiverId &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+    }
+  }
+}

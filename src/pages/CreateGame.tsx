@@ -1,8 +1,45 @@
+import React, { useState } from 'react';
 import { MapPin, Map as MapIcon, Plus, Check, Users, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { useFirebase } from '../context/FirebaseContext';
+import { db, collection, addDoc } from '../firebase';
 
 export default function CreateGame() {
+  const { user } = useFirebase();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    date: '',
+    time: '',
+    location: 'Arena One, Downtown',
+    type: '5 vs 5',
+    cost: 15,
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      await addDoc(collection(db, 'games'), {
+        ...formData,
+        organizerId: user.uid,
+        players: [user.uid],
+        status: 'scheduled',
+        createdAt: new Date().toISOString()
+      });
+      navigate('/');
+    } catch (error) {
+      console.error('Error creating game:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-10">
       <section className="space-y-2">
@@ -12,7 +49,7 @@ export default function CreateGame() {
         </h2>
       </section>
 
-      <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-8" onSubmit={handleSubmit}>
         {/* Basic Info Card */}
         <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/20 field-pattern relative overflow-hidden">
           <div className="absolute -top-4 -right-4 opacity-5 pointer-events-none">
@@ -26,6 +63,9 @@ export default function CreateGame() {
                 className="w-full bg-surface-container-low border border-transparent rounded-lg p-4 focus:border-primary focus:bg-surface-container-lowest transition-all text-on-surface font-semibold placeholder:text-outline-variant/50 outline-none" 
                 placeholder="e.g. Wednesday Night Lights" 
                 type="text" 
+                required
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               />
             </div>
             
@@ -35,6 +75,9 @@ export default function CreateGame() {
                 <input 
                   className="w-full bg-surface-container-low border border-transparent rounded-lg p-4 focus:border-primary focus:bg-surface-container-lowest transition-all text-on-surface outline-none" 
                   type="date" 
+                  required
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -42,6 +85,9 @@ export default function CreateGame() {
                 <input 
                   className="w-full bg-surface-container-low border border-transparent rounded-lg p-4 focus:border-primary focus:bg-surface-container-lowest transition-all text-on-surface outline-none" 
                   type="time" 
+                  required
+                  value={formData.time}
+                  onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                 />
               </div>
             </div>
@@ -59,6 +105,8 @@ export default function CreateGame() {
                   className="w-full bg-surface-container-low border border-transparent rounded-lg p-4 pl-12 focus:border-primary focus:bg-surface-container-lowest transition-all text-on-surface outline-none" 
                   placeholder="Search stadium or park..." 
                   type="text" 
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 />
               </div>
             </div>
@@ -82,7 +130,7 @@ export default function CreateGame() {
               </div>
             </div>
             <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md shadow-sm border border-white/50">
-              <p className="text-[10px] font-bold text-on-surface uppercase tracking-tight">Arena One, Downtown</p>
+              <p className="text-[10px] font-bold text-on-surface uppercase tracking-tight">{formData.location}</p>
             </div>
           </div>
         </div>
@@ -92,14 +140,15 @@ export default function CreateGame() {
           <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/20 space-y-4">
             <label className="font-headline font-semibold text-[10px] uppercase tracking-wider text-on-surface-variant">Game Type</label>
             <div className="flex flex-wrap gap-2">
-              {['5 vs 5', '7 vs 7', '11 vs 11'].map((type, i) => (
+              {['5 vs 5', '7 vs 7', '11 vs 11'].map((type) => (
                 <button 
                   key={type}
                   className={cn(
                     "px-3 py-2 rounded-full font-headline font-bold text-[10px] uppercase transition-colors",
-                    i === 0 ? "bg-primary text-white" : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high"
+                    formData.type === type ? "bg-primary text-white" : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high"
                   )}
                   type="button"
+                  onClick={() => setFormData({ ...formData, type })}
                 >
                   {type}
                 </button>
@@ -114,7 +163,8 @@ export default function CreateGame() {
               <input 
                 className="w-full bg-surface-container-low border border-transparent rounded-lg p-4 pl-10 focus:border-primary focus:bg-surface-container-lowest transition-all text-on-surface font-bold text-xl outline-none" 
                 type="number" 
-                defaultValue="15" 
+                value={formData.cost}
+                onChange={(e) => setFormData({ ...formData, cost: parseInt(e.target.value) })}
               />
             </div>
           </div>
@@ -163,8 +213,12 @@ export default function CreateGame() {
           </div>
         </div>
 
-        <button className="w-full bg-primary py-5 rounded-xl text-white font-headline font-black text-lg uppercase tracking-widest shadow-lg shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 transition-all">
-          Create Game
+        <button 
+          type="submit"
+          disabled={loading}
+          className="w-full bg-primary py-5 rounded-xl text-white font-headline font-black text-lg uppercase tracking-widest shadow-lg shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-50"
+        >
+          {loading ? 'Creating...' : 'Create Game'}
         </button>
       </form>
     </div>
